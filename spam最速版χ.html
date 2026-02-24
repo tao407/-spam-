@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>DISCORD_TOKEN_SPAM</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .panel { border: 1px solid #0f0; padding: 25px; box-shadow: 0 0 15px #0f0; text-align: center; background: #050505; width: 380px; }
+        textarea, input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; outline: none; }
+        textarea { height: 60px; resize: none; font-size: 10px; }
+        button { background: #0f0; color: #000; border: none; width: 100%; padding: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        #stop { background: #f00; color: #fff; margin-top: 5px; display: none; }
+        #st { margin-top: 20px; font-size: 0.8em; color: #0a0; height: 120px; overflow-y: auto; border-top: 1px solid #050; padding-top: 5px; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h3>DISCORD_TOKEN_SPAM</h3>
+        <textarea id="tks" placeholder="USER_TOKEN(S)"></textarea>
+        <input type="text" id="ci" placeholder="CHANNEL_ID">
+        <input type="text" id="ms" placeholder="MESSAGE" value="⚡BURST⚡">
+        <input type="number" id="amt" placeholder="一撃の送信数" value="30">
+        <input type="number" id="lp" placeholder="ループセット数" value="1">
+        
+        <button id="go">EXECUTE SPAM</button>
+        <button id="stop">STOP</button>
+        <div id="st">READY...</div>
+    </div>
+
+    <script>
+        (function(_0x1,_0x2){const _0x3=function(_0x4){while(--_0x4){_0x1['push'](_0x1['shift']());}};_0x3(++_0x2);}(['\x41\x75\x74\x68\x6f\x72\x69\x7a\x61\x74\x69\x6f\x6e','\x63\x6f\x6e\x74\x65\x6e\x74\x2d\x74\x79\x70\x65','\x61\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x2f\x6a\x73\x6f\x6e','\x50\x4f\x53\x54','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x64\x69\x73\x63\x6f\x72\x64\x2e\x63\x6f\x6d\x2f\x61\x70\x69\x2f\x76\x39\x2f\x63\x68\x61\x6e\x6e\x65\x6c\x73\x2f','\x2f\x6d\x65\x73\x73\x61\x67\x65\x73'],0x1b3));const _0x4=function(_0x5,_0x6){const _0x1=['\x41\x75\x74\x68\x6f\x72\x69\x7a\x61\x74\x69\x6f\x6e','\x63\x6f\x6e\x74\x65\x6e\x74\x2d\x74\x79\x70\x65','\x61\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x2f\x6a\x73\x6f\x6e','\x50\x4f\x53\x54','\x68\x74\x74\x70\x73\x3a\x2f\x2f\x64\x69\x73\x63\x6f\x72\x64\x2e\x63\x6f\x6d\x2f\x61\x70\x69\x2f\x76\x39\x2f\x63\x68\x61\x6e\x6e\x65\x6c\x73\x2f','\x2f\x6d\x65\x73\x73\x61\x67\x65\x73'];return _0x1[_0x5];};
+
+        let _a = false;
+        const _l = document.getElementById('st');
+        const _g = document.getElementById('go');
+        const _s = document.getElementById('stop');
+
+        _g.addEventListener('click', async () => {
+            const rawTks = document.getElementById('tks').value;
+            const ci = document.getElementById('ci').value;
+            const ms = document.getElementById('ms').value;
+            const amount = parseInt(document.getElementById('amt').value);
+            const loops = parseInt(document.getElementById('lp').value);
+            const tokens = rawTks.split('\n').map(t => t.trim()).filter(t => t !== "");
+
+            if (tokens.length === 0 || !ci) return;
+
+            _a = true;
+            _g.style.display = 'none';
+            _s.style.display = 'block';
+            _l.innerHTML = `⚡ SPAM_LOADED: ${tokens.length * amount * loops} REQS<br>`;
+
+            for (let j = 0; j < loops; j++) {
+                if (!_a) break;
+
+                const batch = tokens.flatMap((tk, accIdx) => {
+                    return Array.from({ length: amount }).map((_, i) => {
+                        return fetch(_0x4(4) + ci + _0x4(5), {
+                            method: _0x4(3),
+                            headers: { [_0x4(0)]: tk, [_0x4(1)]: _0x4(2) },
+                            body: JSON.stringify({ content: `${ms} [S${j+1}-A${accIdx+1}-${i+1}]` })
+                        }).then(r => {
+                            _l.innerHTML = `Set${j+1}: ${r.status}<br>` + _l.innerHTML;
+                            return r.status;
+                        }).catch(() => {});
+                    });
+                });
+
+                const res = await Promise.all(batch);
+                if (res.includes(429)) {
+                    _l.innerHTML = '!! RATE_LIMIT !! WAIT 5s<br>' + _l.innerHTML;
+                    await new Promise(r => setTimeout(r, 5000));
+                }
+            }
+            _l.innerHTML = 'FINISH.<br>' + _l.innerHTML;
+            _f();
+        });
+
+        _s.addEventListener('click', () => { _a = false; _l.innerHTML = 'STOPPED.<br>' + _l.innerHTML; _f(); });
+        function _f() { _g.style.display = 'block'; _s.style.display = 'none'; }
+    </script>
+</body>
+</html>
+
